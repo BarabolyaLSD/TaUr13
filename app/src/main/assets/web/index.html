@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1018">
+<link rel="icon" href="img/energy.webp" type="image/webp">
+<title>Тактичний урбаніст</title>
+<style>
+:root{--bg:#0a1018;--bg2:#101a29;--pan:#121c2b;--bd:#2b4a72;--cy:#7fd6ff;--bl:#2ea8ff;--I:#d9822b;--M:#d6383c;--D:#5aa0f0;--tx:#e4ecf8;--mu:#8fa3bf;--ok:#4fd18b;--warn:#ffb84d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:radial-gradient(1200px 600px at 50% -10%,#173057 0,#0a1018 60%) fixed;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#app{max-width:560px;margin:0 auto;padding:8px 10px 40px}
+h1{font-size:26px;margin:14px 0 4px;text-align:center;letter-spacing:.5px;text-shadow:0 0 14px #2ea8ff88}
+.sub{color:var(--mu);text-align:center;margin:0 0 14px;font-size:14px}
+.panel{background:linear-gradient(180deg,#16233a,#0e1726);border:1.5px solid var(--bd);border-radius:14px;padding:10px 12px;margin:10px 0}
+.panel h3{margin:0 0 8px;font-size:13px;letter-spacing:1px;color:var(--cy);text-transform:uppercase}
+input[type=text]{width:100%;padding:13px 14px;font-size:18px;border-radius:12px;border:1.5px solid var(--bd);background:#0b1422;color:var(--tx);outline:none}
+input[type=text]:focus{border-color:var(--bl);box-shadow:0 0 0 3px #2ea8ff33}
+select{padding:10px;border-radius:10px;border:1.5px solid var(--bd);background:#0b1422;color:var(--tx);font-size:15px}
+button{font:inherit;color:var(--tx);border:1.5px solid var(--bd);background:#16253d;border-radius:12px;padding:12px 14px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.98)}
+button.pri{background:linear-gradient(180deg,#2d7fd0,#1c5aa0);border-color:#6fc0ff;font-weight:700}
+button.ok{background:linear-gradient(180deg,#2fa36a,#1c7a4c);border-color:#7ff0b4;font-weight:700}
+button.dng{background:#3a1a22;border-color:#a8404f}
+button:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.6)}
+.row{display:flex;gap:8px;align-items:center}.row.wrap{flex-wrap:wrap}.grow{flex:1}
+.pl{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px solid #22344f}.pl:last-child{border:0}
+.tag{font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid var(--bd);color:var(--cy);background:#0b1422;white-space:nowrap}
+.tag.host{color:var(--warn);border-color:#6b5a2a}.tag.bot{color:#c9a7ff;border-color:#5b4690}.tag.off{color:#ff8a8a;border-color:#7a3a3a}
+header.top{display:flex;align-items:center;gap:8px;padding:8px 10px;margin:6px 0;border-radius:14px;background:#0e1828;border:1.5px solid var(--bd);position:sticky;top:4px;z-index:5}
+header.top img{width:34px;height:34px}
+.ph{font-size:12px;color:var(--mu)}.ph b{color:var(--cy);font-size:14px}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity}
+.oc{min-width:150px;flex:1;scroll-snap-align:start;background:linear-gradient(180deg,#16233a,#0e1726);border:1.5px solid var(--bd);border-radius:12px;padding:8px}
+.oc.act{border-color:var(--warn);box-shadow:0 0 12px #ffb84d55}
+.oc.sel{border-color:var(--bl);box-shadow:0 0 0 3px #2ea8ff66}
+.oc .nm{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cnt{display:flex;gap:8px;margin-top:4px;font-size:14px;align-items:center;flex-wrap:wrap}
+.cnt span{display:inline-flex;align-items:center;gap:2px}.cnt img{width:20px;height:20px}.cnt i{font-style:normal;color:var(--mu);font-size:11px}
+.en{display:flex;gap:4px;flex-wrap:nowrap;margin:2px 0 6px}
+.en div{width:11.5%;aspect-ratio:1;border-radius:50%;border:2px solid #2b4a72;background:#070d17;display:flex;align-items:center;justify-content:center}
+.en div.on{border-color:var(--bl);box-shadow:0 0 8px #2ea8ff99}.en img{width:100%;height:100%}
+.brow{display:flex;align-items:center;gap:6px;margin:6px 0}
+.brow .lb{width:52px;text-align:center;font-size:11px;color:var(--mu)}.brow .lb img{width:34px;height:34px;display:block;margin:0 auto}
+.slots{display:flex;gap:5px;flex:1}
+.sl{flex:1;aspect-ratio:1;border-radius:9px;border:2px dashed #2b3d58;background:#070d17;display:flex;align-items:center;justify-content:center;position:relative}
+.sl.goal{border-color:#41618a}.sl img{width:92%;height:92%}.sl.fill{border-style:solid}
+.sl.fill.I{border-color:var(--I)}.sl.fill.M{border-color:var(--M)}.sl.fill.D{border-color:var(--D)}.sl.ruin{border-style:solid;border-color:#555}
+.cn{font-size:14px;width:40px;text-align:right;font-weight:700}.cn.done{color:var(--ok)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acts button{display:flex;align-items:center;gap:8px;text-align:left;padding:10px}
+.acts button img{width:34px;height:34px}.acts button small{display:block;color:var(--mu);font-size:12px}
+.acts button.sel{border-color:var(--ok);box-shadow:0 0 0 3px #4fd18b55}
+.hand{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cd{width:46%;max-width:190px;border-radius:12px;position:relative;cursor:pointer;border:3px solid transparent;transition:.15s}
+.cd img{width:100%;display:block;border-radius:10px}.cd.dim{opacity:.45;filter:grayscale(.5)}
+.cd.sel{border-color:var(--ok);box-shadow:0 0 14px #4fd18b99;transform:translateY(-4px)}
+.cd.dis{border-color:var(--M);box-shadow:0 0 14px #d6383c99}
+.log{font-size:13px;color:#c8d6ea}.log div{padding:5px 0;border-bottom:1px solid #1c2c44}.log .round{color:var(--cy);font-weight:700}.log .event{color:#ffd28a}.log .win{color:var(--ok);font-weight:700}
+.msg{padding:10px;border-radius:10px;background:#0b1a2e;border:1px dashed #3d6aa3;text-align:center;color:var(--cy)}
+.big{font-size:17px;font-weight:700}
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal .box{background:#0f1a2c;border:2px solid var(--bl);border-radius:16px;padding:18px;max-width:420px;width:100%;text-align:center;max-height:90vh;overflow:auto}
+.modal img.zoom{width:100%;max-width:340px;border-radius:14px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#3a1a22;border:1.5px solid #ff8a8a;padding:10px 16px;border-radius:12px;z-index:30;display:none;max-width:90%;text-align:center}
+#net{position:fixed;top:0;left:0;right:0;background:#7a3a3a;text-align:center;padding:4px;font-size:13px;z-index:40;display:none}
+.url{font-family:ui-monospace,Consolas,monospace;background:#070d17;border:1px solid var(--bd);border-radius:8px;padding:6px 8px;margin:4px 0;word-break:break-all;color:var(--cy);font-size:14px}
+.rules li{margin:5px 0}
+.trophy{font-size:54px}
+
+/* --- Realistic city strategy visual refresh (v3) --- */
+:root{--bg:#08111a;--bg2:#101b27;--pan:#14202d;--bd:#465c70;--cy:#d7e7f2;--bl:#55b9f4;--I:#d28a43;--M:#b9c9d6;--D:#5da8e8;--tx:#eef4f7;--mu:#a9bac8;--ok:#70c997;--warn:#e5b968}
+html,body{background:#071019;color:#eef4f7}
+body{background:linear-gradient(180deg,#0d1822 0,#060d14 72%) fixed}
+#app{max-width:740px;padding:8px 12px 40px}
+header.top{background:linear-gradient(180deg,#243544ee,#101a25ee),url('img/steel-texture.webp');border:1px solid #6c8495;border-radius:10px;box-shadow:0 6px 18px #0008,inset 0 1px #ffffff18;backdrop-filter:blur(8px)}
+header.top img{width:38px;height:38px;filter:drop-shadow(0 1px 3px #000)}
+.panel{background:linear-gradient(145deg,#202f3b,#101923 75%),url('img/steel-texture.webp');border:1px solid #566c7c;border-radius:11px;box-shadow:0 5px 14px #0005,inset 0 1px #ffffff12;padding:12px 13px}
+.panel h3{color:#d7e4ed;letter-spacing:.7px;font-size:13px;border-bottom:1px solid #52677866;padding-bottom:7px}
+button{background:linear-gradient(180deg,#354958,#1c2a36 60%,#15212b);border:1px solid #708696;border-radius:9px;box-shadow:0 3px 6px #0005,inset 0 1px #ffffff22;transition:filter .12s,transform .12s,border-color .12s}
+button:active{transform:translateY(1px) scale(.99);filter:brightness(1.15)}
+button.pri{background:linear-gradient(180deg,#397ca8,#245371 55%,#173b54);border-color:#7db8d8;box-shadow:0 3px 8px #0005,inset 0 1px #ffffff2a}
+button.ok{background:linear-gradient(180deg,#357b59,#24543f 55%,#183b2c);border-color:#83c9a2}
+button.dng{background:linear-gradient(180deg,#6a3b42,#40232a);border-color:#b9787d}
+input[type=text],select{background:linear-gradient(180deg,#111c26,#0a121a);border-color:#53697a}
+.oc{background:linear-gradient(150deg,#273744,#15222e);border:1px solid #536a7b;border-radius:9px;box-shadow:0 3px 8px #0004}
+.oc.act{border-color:#d6b66e;box-shadow:0 0 0 1px #d6b66e55}
+.oc.sel{border-color:#79bfe7;box-shadow:0 0 0 2px #79bfe755}
+.en div{border-radius:4px;background:linear-gradient(180deg,#111d27,#070d13);border-color:#50687b}
+.en div.on{border-color:#64b7e9;box-shadow:0 0 6px #64b7e977}
+.sl{border-radius:6px;background:linear-gradient(145deg,#1b2a36,#0c151d);border-color:#586c7b}
+.sl.fill{box-shadow:inset 0 1px #ffffff22,0 2px 4px #0004}
+.acts{gap:9px}.acts button{background:linear-gradient(150deg,#2c3c4a,#172530);border-color:#657b8c;border-radius:9px;min-height:70px}
+.acts button.sel{border-color:#80c8a4;box-shadow:0 0 0 2px #80c8a444}
+.hand{align-items:stretch;gap:8px}
+.cd{width:calc(50% - 6px);max-width:220px;border-radius:9px;border:2px solid #53697a;box-shadow:0 4px 10px #0006;overflow:hidden;background:#111b24}
+.cd img{border-radius:6px;display:block}
+.cd.sel{border-color:#e1c174;box-shadow:0 0 0 2px #e1c17455,0 6px 14px #0007;transform:translateY(-3px)}
+.cd.dis{border-color:#c66f6f;box-shadow:0 0 0 2px #c66f6f55}
+.msg{background:linear-gradient(180deg,#1a2936,#101b25);border:1px solid #637b8d;color:#d9e7f0;border-style:solid}
+.tag{background:#162431;border-color:#637889;color:#d6e5ef}
+.tag.host{color:#e5c27a;border-color:#8e7444}.tag.bot{color:#c3d1df;border-color:#66788a}
+.log div{border-color:#334554}
+.modal .box{background:linear-gradient(145deg,#233441,#101922);border-color:#7292a7;box-shadow:0 12px 40px #000a}
+.city-scene{position:relative;overflow:hidden;border-radius:8px;height:clamp(150px,43vw,270px);margin:8px 0 10px;border:1px solid #70899b;background:#0b141d url('img/city.webp') center 53%/cover;box-shadow:inset 0 0 0 1px #ffffff10,0 4px 12px #0005}
+.city-scene:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#06111a18 0%,#06111a08 42%,#06111a99 100%),linear-gradient(90deg,#06111a55,transparent 35%,transparent 65%,#06111a44)}
+.city-scene .scene-label{position:absolute;z-index:1;left:10px;bottom:9px;padding:5px 8px;border-radius:5px;background:#0c1824c9;border:1px solid #8296a855;color:#edf4f8;font-size:12px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 3px #000}
+.brow .lb img{filter:drop-shadow(0 2px 3px #0005)}
+@media(min-width:600px){#app{max-width:900px}.cd{max-width:190px}}
+@media(max-width:390px){#app{padding-left:7px;padding-right:7px}.panel{padding:9px}.acts button{padding:8px}.cd{width:48%}}
+
+
+/* Interactive tactical city map layer */
+.city-scene{touch-action:none;cursor:grab;isolation:isolate;pointer-events:auto;background:none!important}
+.city-map-bg{position:absolute;inset:0;z-index:0;background:#08121b url('img/city.webp') center 53%/cover;transform-origin:top left;pointer-events:none;will-change:transform;filter:brightness(.66) saturate(.86) contrast(1.06)}
+.city-scene:after{z-index:1;background:linear-gradient(180deg,#06111a18 0%,#06111a08 42%,#06111a99 100%),linear-gradient(90deg,#06111a55,transparent 35%,transparent 65%,#06111a44),linear-gradient(0deg,#06142132,#06142132)}
+.city-map-svg{pointer-events:auto}
+.city-scene:after{z-index:1}
+.city-scene.map-drag{cursor:grabbing}
+.city-map-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:hidden;touch-action:none;user-select:none}
+.city-map-svg .district{stroke-width:3;stroke-linejoin:round;stroke-opacity:.9;fill-opacity:.12;cursor:pointer;transition:fill-opacity .15s,stroke-width .15s,filter .15s}
+.city-map-svg .district:hover,.city-map-svg .district.selected{fill-opacity:.34;stroke-width:5;filter:drop-shadow(0 0 7px currentColor)}
+.city-map-svg .district-label{font:700 15px system-ui,sans-serif;letter-spacing:1px;fill:#eef7ff;text-anchor:middle;paint-order:stroke;stroke:#07111b;stroke-width:4px;stroke-linejoin:round;pointer-events:none}
+.city-map-svg .owner-mark{font:700 12px system-ui,sans-serif;fill:#eaf6ff;text-anchor:middle;pointer-events:none}
+.city-map-svg .build-icon{filter:drop-shadow(0 2px 3px #000);pointer-events:none}
+.map-tools{position:absolute;z-index:5;left:10px;top:calc(clamp(52px,13vh,74px) + 52px);display:flex;gap:4px;pointer-events:auto}
+.map-tools button{width:38px;min-width:38px;height:34px;padding:2px 5px;background:#071522dd;border:1px solid #6da9c9;color:#d9f3ff;font-size:19px;border-radius:6px;backdrop-filter:blur(4px)}
+.map-legend{position:absolute;z-index:5;right:10px;bottom:calc(40vh + 8px);padding:6px 9px;border-radius:7px;background:#06121de0;border:1px solid #4f718b;display:flex;gap:8px;flex-wrap:wrap;font:700 10px system-ui;pointer-events:none}
+.map-legend span{display:inline-flex;align-items:center;gap:4px}.map-legend i{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 6px currentColor}
+.map-sector-info{position:absolute;z-index:6;left:10px;bottom:calc(40vh + 8px);width:min(36vw,300px);max-width:45%;padding:7px 10px;border:1px solid #58b8ed;border-radius:8px;background:linear-gradient(180deg,#071827ee,#06111de8);box-shadow:0 4px 14px #0008,0 0 12px #17aaff24;backdrop-filter:blur(5px);color:#eaf5fc;font-size:clamp(10px,1.8vh,13px);pointer-events:none}
+.map-sector-info strong{display:block;color:#9be2ff;font-size:clamp(11px,2vh,14px);margin-bottom:2px}
+.map-sector-info .sector-owner{opacity:.9}.map-sector-info .sector-meta{color:#c6d9e7;margin-top:3px}
+.map-hint{position:absolute;z-index:4;left:50%;transform:translateX(-50%);top:calc(clamp(52px,13vh,74px) + 52px);font-size:clamp(9px,1.5vh,11px);background:#071522bb;padding:4px 7px;border-radius:6px;color:#cce9f7;pointer-events:none;white-space:nowrap}
+@media (orientation:landscape) and (max-height:420px){.map-tools{top:48px}.map-hint{top:48px}.map-legend{bottom:calc(44vh + 3px)}.map-sector-info{bottom:calc(44vh + 3px)}}
+@media (orientation:portrait){.city-map-svg{min-height:180px}.map-tools{top:8px}.map-hint{top:8px}.map-sector-info{bottom:8px;max-width:55%;width:260px}.map-legend{bottom:8px;right:8px;max-width:44%}}
+
+
+/* v13 visual-only facelift: original game rules and interaction logic remain untouched */
+:root{--bg:#060d16;--bg2:#0b1725;--pan:#102033;--bd:#356a95;--cy:#a6e5ff;--bl:#37b7ff;--I:#d99a4e;--M:#b8d2e8;--D:#60baff;--tx:#edf7ff;--mu:#a4bbcf;--ok:#6ee6ac;--warn:#ffd16b}
+html,body{background:#050b13;color:#edf6ff}
+body{background:radial-gradient(ellipse at 50% -18%,#18385b 0,#091522 38%,#050b13 76%) fixed}
+#app{padding-top:7px}
+header.top{background:linear-gradient(180deg,#1d3650ee,#0b1724ee),url('img/steel-texture.webp');border-color:#5c91b7;box-shadow:0 6px 20px #0008,inset 0 1px #ffffff22,0 0 12px #158bd51c}
+.panel{background:linear-gradient(145deg,#172b40,#091522 78%),url('img/steel-texture.webp');border-color:#426b8a;box-shadow:0 5px 16px #0006,inset 0 1px #ffffff14}
+.panel h3{color:#b6e8ff;border-bottom-color:#4b88b244}
+button{background:linear-gradient(180deg,#29465e,#142637 58%,#0b1723);border-color:#5d83a2;box-shadow:0 3px 8px #0006,inset 0 1px #ffffff26}
+button.pri{background:linear-gradient(180deg,#198bd1,#105c92 62%,#0b3656);border-color:#65c8ff;box-shadow:0 0 10px #1688cc30,inset 0 1px #ffffff30}
+button.ok{background:linear-gradient(180deg,#258a60,#15563f);border-color:#77d6a7}
+button.dng{background:linear-gradient(180deg,#703b48,#38202a);border-color:#ce7c87}
+.oc{background:linear-gradient(150deg,#1c354c,#0b1724);border-color:#507995;box-shadow:0 3px 9px #0005,inset 0 1px #ffffff14}
+.oc.act{border-color:#f0c36d;box-shadow:0 0 12px #d89c3b35}.oc.sel{border-color:#4fc3ff;box-shadow:0 0 0 2px #37b7ff44,0 0 14px #37b7ff28}
+.en div{border-color:#38668b;background:linear-gradient(180deg,#102337,#07111c)}.en div.on{border-color:#6ad2ff;box-shadow:0 0 9px #3ab8ff88}
+.sl{border-color:#47718e;background:linear-gradient(145deg,#173149,#081522)}.sl.fill{box-shadow:inset 0 1px #ffffff22,0 2px 6px #0006}
+.acts button{background:linear-gradient(150deg,#203d56,#0d1b28);border-color:#5481a0;box-shadow:0 3px 10px #0005,inset 0 1px #ffffff1b}.acts button.sel{border-color:#7ee4ae;box-shadow:0 0 0 2px #65d49a33,0 0 12px #45b98222}
+.cd{border-color:#3e78a0;background:#081521;box-shadow:0 5px 14px #0007;transition:transform .15s,box-shadow .15s,border-color .15s}.cd img{border-radius:7px}
+.cd.sel{border-color:#70d9ff;box-shadow:0 0 0 2px #45bfff55,0 8px 18px #0009,0 0 15px #1a9cdb44;transform:translateY(-5px)}
+.cd.dim{opacity:.52;filter:saturate(.6) brightness(.72)}
+.msg{background:linear-gradient(180deg,#14324b,#0b1825);border-color:#5294bc;color:#d9f3ff}
+.tag{background:#10263a;border-color:#5280a1;color:#c6efff}.tag.host{color:#ffe09a;border-color:#927b48}.tag.bot{color:#c6dcf2;border-color:#69839c}
+.city-scene{border-color:#66a7ce;box-shadow:inset 0 0 0 1px #bdefff17,0 5px 16px #0007,0 0 18px #187bb51a}
+.city-map-bg{filter:brightness(.62) saturate(1.05) contrast(1.12)}
+.map-tools button{border-color:#61b9e8;background:#061725ed;box-shadow:0 2px 8px #0008,0 0 8px #1b98d833}
+.map-legend,.map-sector-info{border-color:#5aa4d2;box-shadow:0 4px 14px #0008,0 0 10px #1a91d522}
+.modal .box{border-color:#60b9e8;box-shadow:0 12px 40px #000b,0 0 18px #1598d522}
+@media (orientation:landscape) and (max-height:500px){#app{max-width:980px;padding-top:4px;padding-bottom:18px}header.top{margin:3px 0;padding:5px 8px}.panel{margin:6px 0;padding:8px 10px}.cd{max-width:180px}.city-scene{height:clamp(128px,38vh,205px)}}
+
+</style></head><body>
+<div id="net">Немає зв’язку з сервером… перепідключення</div>
+<div id="app"></div><div id="toast"></div>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const NAME = {I:'Промисловість', M:'Військо', D:'Оборона'};
+const SHORT = {I:'Пром.', M:'Військо', D:'Оборона'};
+const ICON = {I:'img/industry.webp', M:'img/military.webp', D:'img/defense.webp'};
+const CARDS = {
+ spy:['Шпигун','Ціль втрачає 1 оборону. Немає оборони — 2 промисловості.'],
+ adm:['Генерал','Ціль втрачає 1 військо (немає — 2 промисловості) і 1 оборону, якщо вона є.'],
+ dis:['Стихійне лихо','Ціль втрачає 1 промисловість, якщо вона є. Оборона не захищає.'],
+ cri:['Економічна криза','Енергія цілі стає 0.'],
+ sab:['Диверсія','Ціль втрачає 1 оборону. Немає оборони — 1 промисловість.']};
+let token = localStorage.getItem('tu_token') || '', ver = 0, S = null, urls = [], netOK = true, lastKey = '';
+let ui = {name: localStorage.getItem('tu_name') || '', card: null, target: null, targetSector: null, pending: null, showLog: false, zoom: null, rules: false, thr: 5, seatName: ''};
+let polling = false, wasMyTurn = false, renderedJoin = false, ctl = null;
+function kick(){ if(ctl) try{ ctl.abort(); }catch(e){} }
+
+function toast(t){ const e=$('#toast'); e.textContent=t; e.style.display='block'; clearTimeout(toast.t); toast.t=setTimeout(()=>e.style.display='none',3200); }
+async function api(path, body){
+  const r = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const d = await r.json().catch(()=>({error:'Помилка відповіді'}));
+  if(!r.ok){ if(d.error==='bad_token'){ resetSession(); } throw new Error(d.error||'Помилка'); }
+  return d;
+}
+function act(type, extra){ return api('/api/action', Object.assign({token, type}, extra||{})).catch(e=>{ toast(e.message); }); }
+function resetSession(){ token=''; ver=0; localStorage.removeItem('tu_token'); S=null; renderedJoin=false; ui.card=ui.target=ui.pending=null; render(); kick(); }
+
+async function poll(){
+  if(polling) return; polling = true;
+  while(true){
+    try{
+      ctl = new AbortController(); const mine = ctl; const to = setTimeout(()=>mine.abort(), 30000);
+      const r = await fetch(`/api/state?token=${encodeURIComponent(token)}&v=${ver}`, {signal: mine.signal, cache:'no-store'});
+      clearTimeout(to);
+      if(r.status===401){ resetSession(); await sleep(500); continue; }
+      const d = await r.json();
+      setNet(true);
+      if(d.v !== ver || !S){ ver = d.v; S = d; onState(); render(); }
+      else { S = d; }
+    }catch(e){ if(e && e.name==='AbortError'){ continue; } setNet(false); await sleep(1500); }
+  }
+}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+function setNet(ok){ netOK=ok; $('#net').style.display = ok?'none':'block'; }
+async function loadInfo(){ try{ const r=await fetch('/api/info'); urls=(await r.json()).urls||[]; }catch(e){} }
+
+function me(){ return S && S.players.find(p=>p.id===S.you); }
+function pl(id){ return S.players.find(p=>p.id===id); }
+function onState(){
+  // скидання вибору при зміні фази
+  const key = S.phase+':'+S.round;
+  if(key!==lastKey){ lastKey=key; ui.card=null; ui.target=null; ui.pending=null; }
+  const my = !!(S.event_open) || (S.phase==='build' && S.you && !S.mine_submitted);
+  if(my && !wasMyTurn && navigator.vibrate) try{ navigator.vibrate(120); }catch(e){}
+  wasMyTurn = my;
+  if(S.hand && ui.card!=null && ui.card>=S.hand.length) ui.card=null;
+}
+
+// ------------------------------------------------------------------ рендер
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function render(){
+  const app = $('#app');
+  if(!S){ app.innerHTML = '<h1>Тактичний урбаніст</h1><p class="sub">Підключення…</p>'; return; }
+  if(!token || !S.you){ return renderJoin(app); }
+  renderedJoin = false;
+  if(S.phase==='lobby') return renderLobby(app);
+  renderGame(app);
+}
+
+function playersList(withActions){
+  const host = S.host;
+  return S.players.map(p=>{
+    const tags = [];
+    if(p.id===host) tags.push('<span class="tag host">господар</span>');
+    if(p.kind==='ai') tags.push('<span class="tag bot">бот</span>');
+    if(p.kind==='neighbor') tags.push(`<span class="tag bot">Сусід · поріг ${p.thr}+</span>`);
+    if(p.kind==='human' && !p.online) tags.push('<span class="tag off">офлайн</span>');
+    if(p.id===S.you) tags.push('<span class="tag">ви</span>');
+    const rm = (withActions && S.you===host && p.id!==S.you) || (withActions && p.id===S.you && S.phase==='lobby' && S.you!==host)
+      ? `<button class="dng" data-act="remove" data-id="${p.id}" style="padding:6px 10px">✕</button>` : '';
+    return `<div class="pl"><span class="grow big">${esc(p.name)}</span>${tags.join(' ')}${rm}</div>`;
+  }).join('') || '<div class="sub">Поки нікого</div>';
+}
+
+function renderJoin(app){
+  if(renderedJoin){ const l=$('#plist'); if(l) l.innerHTML = playersList(false); const s=$('#seats'); if(s) s.innerHTML=seatsHtml(); return; }
+  renderedJoin = true;
+  app.innerHTML = `<h1>⚡ Тактичний урбаніст</h1><p class="sub">Мережева версія для тестування</p>
+  <div class="panel"><h3>Ваше ім’я</h3>
+   <input id="nm" type="text" maxlength="16" placeholder="Наприклад: Олег" value="${esc(ui.name)}" autocomplete="off">
+   <div style="height:10px"></div>
+   ${S.can_join ? '<button class="pri" style="width:100%" data-act="join">Приєднатися до гри</button>' : '<div class="msg">Гра вже йде або кімната заповнена.</div>'}
+  </div>
+  <div class="panel"><h3>У кімнаті</h3><div id="plist">${playersList(false)}</div></div>
+  <div id="seats">${seatsHtml()}</div>
+  <div class="panel"><button style="width:100%" data-act="rules">Правила коротко</button></div>`;
+  const nm=$('#nm'); nm.oninput=()=>{ ui.name=nm.value; };
+  nm.onkeydown=e=>{ if(e.key==='Enter') doJoin(); };
+  if(ui.rules) showRules();
+}
+function seatsHtml(){
+  if(S.phase==='lobby' || !S.seats || !S.seats.length) return '';
+  return `<div class="panel"><h3>Зайняти вільне місце</h3>`+S.seats.map(id=>{const p=pl(id);
+    return `<div class="pl"><span class="grow">${esc(p.name)}</span><button class="pri" data-act="claim" data-id="${id}">Зайняти</button></div>`}).join('')+`</div>`;
+}
+async function doJoin(seat){
+  const name = (ui.name||'').trim(); if(!name){ toast('Введіть ім’я'); return; }
+  try{
+    const d = await api('/api/join', {name, seat: seat||undefined});
+    token = d.token; localStorage.setItem('tu_token', token); localStorage.setItem('tu_name', name);
+    ver = 0; S = null; renderedJoin = false; render(); kick();
+  }catch(e){ toast(e.message); }
+}
+
+function renderLobby(app){
+  const host = S.you===S.host;
+  app.innerHTML = `<h1>⚡ Тактичний урбаніст</h1><p class="sub">Лобі · гравців: ${S.players.length}/6</p>
+  <div class="panel"><h3>Гравці</h3>${playersList(true)}</div>
+  ${host ? `<div class="panel"><h3>Додати учасників</h3>
+     <div class="row wrap"><button data-act="addbot" class="grow">+ Бот</button></div>
+     <div class="row wrap" style="margin-top:8px"><button data-act="addnb" class="grow">+ Автоматичний Сусід</button>
+       <select id="thr"><option value="5">нормальний (5–6)</option><option value="4">складний (4–6)</option><option value="3">жорсткий (3–6)</option></select></div>
+     <p class="sub" style="margin:8px 0 0">Для гри наодинці додайте Сусіда. Для тесту без людей — ботів.</p></div>
+     <div class="panel"><button class="ok big" style="width:100%" data-act="start" ${S.players.length<2?'disabled':''}>▶ Почати гру</button></div>`
+   : '<div class="panel msg">Очікуємо, поки господар кімнати розпочне гру…</div>'}
+  <div class="panel"><h3>Адреса для інших гравців</h3>${(urls.length?urls:[location.origin]).map(u=>`<div class="url">${esc(u)}</div>`).join('')}</div>
+  <div class="panel"><button style="width:100%" data-act="rules">Правила коротко</button></div>`;
+  const t=$('#thr'); if(t){ t.value=String(ui.thr); t.onchange=()=>{ ui.thr=+t.value; }; }
+}
+
+function hit(p,t){ return p[t]; }
+function cntHtml(p){
+  return ['I','M','D'].map(t=>`<span title="${NAME[t]}"><img src="${ICON[t]}">${p[t]}${p['r'+t]?`<i>+${p['r'+t]}р</i>`:''}</span>`).join('');
+}
+
+// Tactical districts overlay: selection, touch pan, pinch/wheel zoom and building markers.
+const MAP_SECTORS=[
+ {id:1,n:'Північний квартал',short:'ПІВНІЧ',t:'Житловий',p:'0,0 218,0 252,84 230,220 0,200',cx:118,cy:100,desc:'Житлові квартали з базовими сервісами та міськими дорогами.'},
+ {id:2,n:'Центральний житловий',short:'ЖИТЛО',t:'Житловий',p:'218,0 500,0 486,168 500,190 230,220 252,84',cx:375,cy:100,desc:'Густонаселена зона з житловою забудовою та локальною інфраструктурою.'},
+ {id:3,n:'Енергетичний вузол',short:'ЕНЕРГЕТИКА',t:'Енергетика',p:'500,0 742,0 770,95 770,215 500,190 486,168',cx:630,cy:100,desc:'Міський енергетичний вузол — критична інфраструктура постачання.'},
+ {id:4,n:'Промислова зона',short:'ПРОМЗОНА',t:'Промисловий',p:'742,0 1000,0 1000,200 770,215 770,95',cx:875,cy:100,desc:'Промислова зона з виробничими майданчиками та логістичними дорогами.'},
+ {id:5,n:'Західний промисловий район',short:'ПРОМЗОНА',t:'Промисловий',p:'0,200 230,220 260,344 216,390 0,400',cx:120,cy:300,desc:'Західний промисловий кластер із місцем для виробничого розвитку.'},
+ {id:6,n:'Центр міста',short:'ЦЕНТР',t:'Адміністративний',p:'230,220 500,190 520,330 500,420 260,390 216,390 260,344',cx:375,cy:300,desc:'Адміністративний центр, центральні площі та міські установи.'},
+ {id:7,n:'Транспортний вузол',short:'ТРАНСПОРТ',t:'Транспорт',p:'500,190 770,215 742,344 740,395 500,420 520,330',cx:625,cy:300,desc:'Транспортний вузол, що з’єднує райони та потоки міста.'},
+ {id:8,n:'Військова база',short:'ВІЙСЬКОВА БАЗА',t:'Військовий',p:'770,215 1000,200 1000,410 780,430 740,395 742,344',cx:875,cy:300,desc:'Військова база та об’єкти стратегічного забезпечення.'},
+ {id:9,n:'Промисловий парк',short:'ПРОМПАРК',t:'Промисловий',p:'0,400 216,390 260,455 250,600 0,600',cx:120,cy:500,desc:'Промисловий парк із резервом для нових підприємств.'},
+ {id:10,n:'Оборонний периметр',short:'ОБОРОНА',t:'Оборона',p:'216,390 260,390 500,420 520,500 500,600 250,600 260,455',cx:375,cy:500,desc:'Оборонний периметр та позиції міської безпеки.'},
+ {id:11,n:'Річкова набережна',short:'НАБЕРЕЖНА',t:'Комерційний',p:'500,420 740,395 780,430 750,600 500,600 520,500',cx:625,cy:500,desc:'Набережна, комерційна зона та міські рекреаційні простори.'},
+ {id:12,n:'Портовий сектор',short:'ПОРТ',t:'Логістика',p:'740,395 780,430 1000,410 1000,600 750,600',cx:875,cy:500,desc:'Порт і логістична територія для зовнішніх перевезень.'}
+];
+const MAP_COLORS=['#29b9ff','#ff4058','#2fe28d','#ffd044','#9b7bff','#ff8a40'];
+let mapState={selected:1,scale:1,x:0,y:0,pointers:new Map(),drag:false,start:null,last:null,startSector:null,lastSector:null,pinchStart:0,pinchScale:1,skipClick:false};
+function mapSectorData(id){return (S.sectors||[]).find(q=>q.id===id)||{id,owner:0,I:0,M:0,D:0};}
+function mapOwnerIndex(id){const sec=mapSectorData(id),ix=S.players.findIndex(p=>p.id===sec.owner);return Math.max(0,ix);}
+function mapOwner(id){const sec=mapSectorData(id);return S.players.find(p=>p.id===sec.owner)||null;}
+function mapTypeIcon(t){return ({I:'🏭',M:'🪖',D:'🛡️'})[t]||'🏢';}
+function districtSvg(s,ownerIndex,selected,ownerName){const color=MAP_COLORS[ownerIndex%MAP_COLORS.length];return `<polygon class="district ${selected?'selected':''}" data-sector="${s.id}" points="${s.p}" stroke="${color}" fill="${color}" style="color:${color}"/><text class="district-label" x="${s.cx}" y="${s.cy-5}">${s.id} · ${s.short||s.n}</text><text class="owner-mark" x="${s.cx}" y="${s.cy+17}">${esc(ownerName)}</text>`;}
+function renderMap(){
+ const g=$('#map-world');if(!g||!S)return;const m=me();
+ const ownerNames=S.players.map(p=>p.name);let polys='';
+ MAP_SECTORS.forEach((s,i)=>{const oi=mapOwnerIndex(s.id),owner=S.players[oi]||null;polys+=districtSvg(s,oi,mapState.selected===s.id,owner?owner.name:'Нейтральний');});
+ // Sector-local building icons are drawn from the authoritative server state.
+ let markerMarkup='',placed=0; const bColors={I:'#ffad4d',M:'#a9e77d',D:'#52c8ff'},bNames={I:'П',M:'В',D:'О'};
+ for(const sec of (S.sectors||[])){const s=MAP_SECTORS.find(q=>q.id===sec.id);if(!s)continue;
+  for(const type of ['I','M','D'])for(let n=0;n<(sec[type]||0);n++){
+   const x=s.cx+({I:-25,M:0,D:25}[type])+((n%2)*10),y=s.cy+32+Math.floor(n/2)*13,c=bColors[type];
+   markerMarkup+=`<g class="build-icon" role="img" aria-label="${bNames[type]} сектор ${s.id}" transform="translate(${x} ${y})"><rect x="-19" y="-15" width="38" height="30" rx="4" fill="#071420ee" stroke="${c}" stroke-width="2"/><path d="M-15 10V-2L-7 -8V10H1V-5L8 -10V10H15V-2L18 1V10Z" fill="#213748" stroke="${c}" stroke-width="1.2"/><g fill="#d9f4ff" opacity=".8"><rect x="-12" y="0" width="3" height="3"/><rect x="-5" y="-3" width="3"/><rect x="4" y="-1" width="3"/><rect x="11" y="3" width="3"/></g><text x="0" y="-17" text-anchor="middle" font-size="10" font-weight="800" fill="${c}" stroke="#07111b" stroke-width="2" paint-order="stroke">${bNames[type]}</text></g>`;placed++;
+  }
+ }
+ const roadLayer=`<g stroke="#8ed8ff" stroke-opacity=".2" stroke-width="5" fill="none"><path d="M0 245L180 180L330 220L490 135L690 175L1000 100M40 525L220 440L410 500L600 405L810 455L1000 380M125 0L260 160L360 300L460 600M670 0L620 175L710 330L850 600"/><path d="M0 245L180 180L330 220L490 135L690 175L1000 100M40 525L220 440L410 500L600 405L810 455L1000 380" stroke-dasharray="12 14" stroke-width="1.5"/></g>`;
+ g.innerHTML=`<g id="map-camera" transform="translate(${mapState.x} ${mapState.y}) scale(${mapState.scale})">${roadLayer}${polys}${markerMarkup}</g>`;
+ const bg=$('.city-map-bg'),scene=$('.city-scene');if(bg&&scene){bg.style.transform=`translate(${mapState.x*scene.clientWidth/1000}px,${mapState.y*scene.clientHeight/600}px) scale(${mapState.scale})`;bg.style.width='100%';bg.style.height='100%';}const legend=$('.map-legend');if(legend){legend.innerHTML=S.players.slice(0,6).map((p,i)=>`<span style="color:${MAP_COLORS[i%MAP_COLORS.length]}"><i style="background:${MAP_COLORS[i%MAP_COLORS.length]}"></i>${esc(p.name)}</span>`).join('');}
+ const selected=MAP_SECTORS.find(s=>s.id===mapState.selected),owner=mapOwner(selected.id),ownerIx=mapOwnerIndex(selected.id),sec=mapSectorData(selected.id),info=$('#map-sector-info');if(info){const color=MAP_COLORS[ownerIx%MAP_COLORS.length];const ownedCount=(S.sectors||[]).filter(q=>q.owner===sec.owner).length;const totals=`Будівлі сектора: промисловість ${sec.I||0} · армія ${sec.M||0} · оборона ${sec.D||0}`;info.innerHTML=`<strong style="color:${color}">СЕКТОР ${selected.id} · ${selected.n}</strong><span class="sector-owner">${selected.t} · Власник: ${esc(owner?owner.name:'Нейтральна зона')} · Секторів власника: ${ownedCount}</span><div class="sector-meta">${esc(selected.desc||'Міський район.')}<br>${esc(totals)}<br><span style="opacity:.85">${sec.owner===S.you?'Ваш сектор — можна розміщувати будівлі.':'Чужа територія — будівництво недоступне.'}</span></div>`;}
+}
+function mapZoom(next,cx=500,cy=300){const prev=mapState.scale;next=Math.max(1,Math.min(2.35,next));const factor=next/prev;mapState.x+=cx*(1-factor);mapState.y+=cy*(1-factor);const limX=(next-1)*1000,limY=(next-1)*600;mapState.x=Math.max(-limX,Math.min(limX,mapState.x));mapState.y=Math.max(-limY,Math.min(limY,mapState.y));mapState.scale=next;renderMap();}
+function mapReset(){mapState.scale=1;mapState.x=mapState.y=0;mapState.drag=false;renderMap();}
+function mapFocus(id){const s=MAP_SECTORS.find(d=>d.id===id);if(!s)return;mapState.selected=id;mapState.scale=Math.max(1.35,mapState.scale);mapState.x=500-s.cx*mapState.scale;mapState.y=300-s.cy*mapState.scale;const lx=(mapState.scale-1)*1000,ly=(mapState.scale-1)*600;mapState.x=Math.max(-lx,Math.min(lx,mapState.x));mapState.y=Math.max(-ly,Math.min(ly,mapState.y));renderMap();}
+function mapPoint(e){const rect=$('.city-map-svg').getBoundingClientRect();return {x:(e.clientX-rect.left)/rect.width*1000,y:(e.clientY-rect.top)/rect.height*600};}
+function mapPointerDown(e){const scene=e.target.closest('.city-scene');if(!scene||e.target.closest('.map-tools'))return;mapState.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});scene.setPointerCapture?.(e.pointerId);if(mapState.pointers.size===1){mapState.start={x:e.clientX,y:e.clientY};mapState.last={x:e.clientX,y:e.clientY};mapState.startSector=e.target.closest('[data-sector]')?.dataset.sector||null;mapState.drag=false;}else if(mapState.pointers.size===2){const ps=[...mapState.pointers.values()];mapState.pinchStart=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);mapState.pinchScale=mapState.scale;}}
+function mapPointerMove(e){if(!mapState.pointers.has(e.pointerId))return;mapState.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(mapState.pointers.size===2){const ps=[...mapState.pointers.values()],d=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);if(mapState.pinchStart>0){const rect=$('.city-map-svg').getBoundingClientRect();mapZoom(mapState.pinchScale*d/mapState.pinchStart,(ps[0].x+ps[1].x-2*rect.left)/2/rect.width*1000,(ps[0].y+ps[1].y-2*rect.top)/2/rect.height*600);}mapState.drag=true;return;}if(mapState.pointers.size===1&&mapState.last){const dx=e.clientX-mapState.last.x,dy=e.clientY-mapState.last.y;if(Math.abs(e.clientX-mapState.start.x)+Math.abs(e.clientY-mapState.start.y)>5){mapState.drag=true;$('.city-scene').classList.add('map-drag');mapState.x+=dx*1000/$('.city-map-svg').clientWidth;mapState.y+=dy*600/$('.city-map-svg').clientHeight;const limX=(mapState.scale-1)*1000,limY=(mapState.scale-1)*600;mapState.x=Math.max(-limX,Math.min(limX,mapState.x));mapState.y=Math.max(-limY,Math.min(limY,mapState.y));renderMap();}mapState.last={x:e.clientX,y:e.clientY};}}
+function mapPointerUp(e){mapState.pointers.delete(e.pointerId);if(mapState.pointers.size<2)mapState.pinchStart=0;if(!mapState.pointers.size){$('.city-scene')?.classList.remove('map-drag');if(mapState.drag)mapState.skipClick=true;else mapState.lastSector=mapState.startSector;mapState.drag=false;mapState.start=mapState.last=null;mapState.startSector=null;}}
+function bindMap(){const scene=$('.city-scene');if(!scene||scene.dataset.mapBound)return;scene.dataset.mapBound='1';scene.addEventListener('pointerdown',mapPointerDown);scene.addEventListener('pointermove',mapPointerMove);scene.addEventListener('pointerup',mapPointerUp);scene.addEventListener('pointercancel',mapPointerUp);scene.querySelector('.map-tools')?.addEventListener('click',e=>{const b=e.target.closest('[data-map]');if(!b)return;if(b.dataset.map==='zoomin')mapZoom(mapState.scale*1.2);else if(b.dataset.map==='zoomout')mapZoom(mapState.scale/1.2);else mapReset();});scene.addEventListener('wheel',e=>{e.preventDefault();const p=mapPoint(e);mapZoom(mapState.scale*(e.deltaY<0?1.12:.89),p.x,p.y);},{passive:false});scene.addEventListener('click',e=>{if(mapState.skipClick){mapState.skipClick=false;return;}const polygon=e.target.closest('[data-sector]'),sid=polygon?.dataset.sector||mapState.lastSector;if(sid){mapFocus(+sid);render();}mapState.lastSector=null;});scene.addEventListener('dblclick',e=>{const poly=e.target.closest('[data-sector]');if(poly)mapFocus(+poly.dataset.sector);});}
+
+function renderGame(app){
+  const R = S.rules, m = me(), others = S.players.filter(p=>p.id!==S.you), act = pl(S.active);
+  const income = R.INCOME[m.I];
+  const phaseTxt = S.phase==='event' ? (S.round<=R.NO_CARD_ROUNDS?'Подія: з 3-го раунду':'Фаза події') : S.phase==='build' ? 'Будівництво (усі разом)' : 'Кінець гри';
+  let h = `<header class="top"><img src="img/energy.webp"><div class="grow"><b>Раунд ${S.round}</b><div class="ph"><b>${phaseTxt}</b></div></div>
+    <div class="ph" style="text-align:right">Маркер: <b>${esc(act?act.name:'')}</b><br>колода ${S.deck}</div>
+    <button data-act="rules" style="padding:6px 10px">?</button></header>`;
+  // суперники
+  h += `<div class="strip">` + others.map(p=>{
+      const chosen = S.event_open && ui.target===p.id;
+      const st = S.phase==='build' ? (p.submitted?'<span class="tag" style="color:var(--ok)">✔ готово</span>':'<span class="tag">думає…</span>') : '';
+      const dataT = S.event_open ? `data-act="target" data-id="${p.id}"` : '';
+      return `<div class="oc ${p.id===S.active?'act':''} ${chosen?'sel':''}" ${dataT}>
+        <div class="nm">${p.kind!=='human'?'🤖 ':''}${esc(p.name)}</div>
+        <div class="cnt"><span><img src="img/energy.webp">${p.E}</span><span>🃏${p.hand}</span>${st}${p.kind==='human'&&!p.online?'<span class="tag off">офлайн</span>':''}</div>
+        <div class="cnt">${cntHtml(p)}</div>${p.id===S.active?'<div class="tag host" style="margin-top:4px;display:inline-block">маркер події</div>':''}</div>`;
+    }).join('') + `</div>`;
+  // моя дошка
+  h += `<div class="panel city-panel"><h3>Моє місто · ${esc(m.name)}</h3>
+    <div class="city-scene" role="application" aria-label="Інтерактивна стратегічна карта міста"><span class="scene-label">МІСЬКА КАРТА · ТЕРИТОРІЇ</span>
+      <div class="city-map-bg" aria-hidden="true"></div><svg class="city-map-svg" viewBox="0 0 1000 600" aria-label="Сектори міста" preserveAspectRatio="none"><g id="map-world"></g></svg>
+      <div class="map-tools"><button data-map="zoomout" aria-label="Зменшити масштаб">−</button><button data-map="reset" aria-label="Скинути камеру">⌖</button><button data-map="zoomin" aria-label="Збільшити масштаб">+</button></div>
+      <div class="map-hint">Виберіть власний сектор для будівництва · Перетягування · Pinch масштаб</div>
+      <div class="map-legend"><span style="color:#30b9ff"><i style="background:#30b9ff"></i>Гравець</span><span style="color:#ff4058"><i style="background:#ff4058"></i>Суперник 1</span><span style="color:#2fe28d"><i style="background:#2fe28d"></i>Суперник 2</span><span style="color:#ffd044"><i style="background:#ffd044"></i>Суперник 3</span></div>
+      <div class="map-sector-info" id="map-sector-info"><strong>Міський огляд</strong><span class="sector-owner">Обирайте сектор для перегляду його характеристик.</span></div></div>
+    <div class="row" style="justify-content:space-between;font-size:13px;color:var(--mu)"><span>Енергія ${m.E}/${R.E_MAX}</span><span>приріст на початку раунду: <b style="color:var(--cy)">+${income}</b></span></div>
+    <div class="en">${Array.from({length:R.E_MAX},(_,i)=>`<div class="${i<m.E?'on':''}">${i<m.E?'<img src="img/energy.webp">':''}</div>`).join('')}</div>`;
+  for(const t of ['I','M','D']){
+    const f=m[t], r=m['r'+t];
+    h += `<div class="brow"><div class="lb"><img src="${ICON[t]}">${SHORT[t]}</div><div class="slots">`+
+      Array.from({length:R.LIMIT},(_,i)=> i<f?`<div class="sl fill ${t}"><img src="${ICON[t]}"></div>` : i<f+r?`<div class="sl ruin"><img src="img/ruin.webp"></div>` : `<div class="sl ${i<3?'goal':''}"></div>`).join('')+
+      `</div><div class="cn ${f>=3?'done':''}">${f}/3</div></div>`;
+  }
+  h += `<div class="ph" style="margin-top:4px">Мета: по 3 будівлі кожного типу одночасно. Рамка слотів 1–3 — мета.</div></div>`;
+  // дії та рука (під час власної події рука вище)
+  if(S.event_open){ // рука
+    h += `<div class="panel"><h3>Рука (${(S.hand||[]).length}/${R.HAND})</h3>${handHtml()}${selInfo()}</div>`;
+  h += `<div class="panel"><h3>${S.phase==='event'?'Подія':S.phase==='build'?'Ваш вибір':'Гра завершена'}</h3>${actionsHtml(m)}</div>`; }
+  else { h += `<div class="panel"><h3>${S.phase==='event'?'Подія':S.phase==='build'?'Ваш вибір':'Гра завершена'}</h3>${actionsHtml(m)}</div>`;
+  // рука
+    h += `<div class="panel"><h3>Рука (${(S.hand||[]).length}/${R.HAND})</h3>${handHtml()}${selInfo()}</div>`; }
+  // лог
+  const lg = S.log.slice().reverse(); const show = ui.showLog ? lg : lg.slice(0,6);
+  h += `<div class="panel"><h3>Хід гри</h3><div class="log">${show.map(l=>`<div class="${l.k}">${esc(l.t)}</div>`).join('')}</div>
+    ${lg.length>6?`<button data-act="log" style="width:100%;margin-top:6px">${ui.showLog?'Згорнути':'Показати все'}</button>`:''}</div>`;
+  if(h !== app._h){ app.innerHTML = h; app._h = h; bindMap(); }
+  renderMap();
+  if(S.phase==='over') showOver();
+  else if(ui.zoom) showZoom(ui.zoom);
+  else if(ui.rules) showRules();
+}
+
+function actionsHtml(m){
+  const R=S.rules;
+  if(S.phase==='over') return `<div class="msg">Партію завершено.</div>`;
+  if(S.phase==='event'){
+    if(S.event_open){
+      const opp = S.players.filter(p=>p.id!==S.you);
+      let hh = `<div class="msg">Ваша подія: оберіть карту, суперника та сектор атаки на карті міста.</div>`;
+      hh += `<div class="row" style="margin-top:8px;flex-wrap:wrap">`+opp.map(p=>`<button class="${ui.target===p.id?'pri':''}" data-act="target" data-id="${p.id}">${p.kind!=='human'?'🤖 ':''}${esc(p.name)}</button>`).join('')+`</div>`;
+      const c = ui.card!=null ? S.hand[ui.card] : null;
+      const afford = ui.card!=null && S.can.play[ui.card];
+      if(ui.target && c && c!=='cri') { const opponent=pl(ui.target), enemySecs=(S.sectors||[]).filter(s=>opponent&&s.owner===opponent.id); hh += `<div class="sub" style="margin-top:8px">Сектор противника для атаки:</div><div class="row" style="flex-wrap:wrap">`+enemySecs.map(s=>`<button class="${ui.targetSector===s.id?'pri':''}" data-act="targetSector" data-id="${s.id}">Сектор ${s.id}</button>`).join('')+`</div>`; }
+      hh += `<div class="row" style="margin-top:10px"><button class="ok grow" data-act="play" ${(c&&afford&&ui.target&&(c==='cri'||ui.targetSector))?'':'disabled'}>Зіграти${c?` «${CARDS[c][0]}» (−${R.CARD_COST[c]}⚡`:''}</button></div>`;
+      if(S.need_discard) hh += `<div class="row" style="margin-top:8px"><button class="dng grow" data-act="skip" ${ui.card==null?'disabled':''}>Скинути вибрану карту й пропустити</button></div><p class="sub">У руці забагато карт: щоб пропустити, оберіть карту для скидання.</p>`;
+      else hh += `<div class="row" style="margin-top:8px"><button class="grow" data-act="skip">Не грати подію</button></div>`;
+      return hh;
+    }
+    const a=pl(S.active); return `<div class="msg">Подію грає <b>${esc(a?a.name:'')}</b>… очікуйте.</div>`;
+  }
+  // build
+  if(S.mine_submitted){ const n=S.players.filter(p=>p.submitted).length; return `<div class="msg">Вибір зроблено. Очікуємо інших: ${n}/${S.players.length}</div>`; }
+  const targetSector=mapSectorData(mapState.selected),canPlace=targetSector.owner===S.you;let hh = `<div class="msg">Розміщення: <b>сектор ${mapState.selected}</b> · ${canPlace?'ваша територія':'чужа територія — оберіть власний сектор'}</div><div class="acts">`;
+  for(const t of ['I','M','D']){
+    const cb=S.can.build[t], cr=S.can.rebuild[t], pend = ui.pending && ui.pending.t===t;
+    hh += `<button data-act="pick" data-k="build" data-t="${t}" class="${pend&&ui.pending.k==='build'?'sel':''}" ${cb&&canPlace?'':'disabled'}><img src="${ICON[t]}"><span>Збудувати<br><b>${NAME[t]}</b><small>−${R.COST[t]}⚡</small></span></button>`;
+  }
+  for(const t of ['I','M','D']){
+    if(m['r'+t]>0){
+      const cost=Math.floor((R.COST[t]+1)/2), pend = ui.pending && ui.pending.t===t;
+      hh += `<button data-act="pick" data-k="rebuild" data-t="${t}" class="${pend&&ui.pending.k==='rebuild'?'sel':''}" ${S.can.rebuild[t]&&canPlace?'':'disabled'}><img src="img/ruin.webp"><span>Відновити<br><b>${NAME[t]}</b><small>−${cost}⚡ · руїн: ${m['r'+t]}</small></span></button>`;
+    }
+  }
+  hh += `</div>`;
+  const pend = ui.pending;
+  hh += `<div class="row" style="margin-top:10px"><button class="ok grow" data-act="confirm" ${pend?'':'disabled'}>${pend?`Підтвердити: ${pend.k==='build'?'збудувати':'відновити'} ${NAME[pend.t].toLowerCase()} · сектор ${pend.sector||mapState.selected}`:'Оберіть дію'}</button></div>
+        <div class="row" style="margin-top:8px"><button class="grow" data-act="none">Нічого не будувати (пас)</button></div>`;
+  return hh;
+}
+function handHtml(){
+  const hand = S.hand||[];
+  if(!hand.length) return '<div class="sub">Карт немає. Карту бере активний гравець у фазі події.</div>';
+  return `<div class="hand">`+hand.map((c,i)=>{
+    const sel = ui.card===i, dim = S.event_open && !S.can.play[i] && !S.need_discard;
+    return `<div class="cd ${sel?(S.need_discard?'dis':'sel'):''} ${dim?'dim':''}" data-act="card" data-i="${i}"><img src="img/${c}.webp" alt="${CARDS[c][0]}"></div>`;
+  }).join('')+`</div>`;
+}
+function selInfo(){
+  if(ui.card==null || !S.hand || !S.hand[ui.card]) return S.hand&&S.hand.length&&!S.event_open?'<div class="sub">Торкніться карти, щоб збільшити.</div>':'';
+  const c=S.hand[ui.card]; return `<div class="msg" style="margin-top:8px"><b>${CARDS[c][0]}</b> (−${S.rules.CARD_COST[c]}⚡): ${CARDS[c][1]}</div>`;
+}
+
+function modal(html){ let m=$('#modal'); if(!m){ m=document.createElement('div'); m.id='modal'; m.className='modal'; document.body.appendChild(m); } m.innerHTML=`<div class="box">${html}</div>`; }
+function closeModal(){ const m=$('#modal'); if(m) m.remove(); }
+function showZoom(c){ modal(`<img class="zoom" src="img/${c}.webp"><p>${CARDS[c][1]}</p><button class="pri" data-act="close">Закрити</button>`); }
+function showRules(){ modal(`<h3 style="margin-top:0">Правила коротко</h3><ol class="rules" style="text-align:left;padding-left:20px">
+ <li><b>Мета:</b> першим мати одночасно по 3 промисловості, війська й оборони (перевірка наприкінці раунду).</li>
+ <li><b>Старт:</b> 1 промисловість і 2 енергії у всіх.</li>
+ <li><b>Раунд:</b> 1) усі отримують енергію (+1 за кожну промисловість, макс. 8); 2) <b>активний гравець</b> (маркер) бере карту й може зіграти одну проти суперника — <i>з 3-го раунду</i>; 3) усі одночасно роблять одну дію: збудувати або відновити руїну.</li>
+ <li><b>Вартість:</b> промисловість 1, оборона 4, військо 5. Руїна відновлюється за половину.</li>
+ <li><b>Карти:</b> Шпигун 2, Диверсія 3, Лихо 3, Криза 4, Генерал 6.</li>
+ <li>У руці не більше 2 карт. Знищена будівля стає руїною й займає слот.</li></ol><button class="pri" data-act="close">Зрозуміло</button>`); }
+function showOver(){
+  const w = S.winners.map(id=>pl(id)).filter(Boolean); const mine = w.some(p=>p.id===S.you);
+  modal(`<div class="trophy">${mine?'🏆':'🏁'}</div><h2 style="margin:6px 0">${mine?'Ви перемогли!':'Гру завершено'}</h2>
+    <p class="big">Переможець: ${w.map(p=>esc(p.name)).join(', ')}</p>${S.cap?'<p class="sub">Ліміт раундів: більше будівель</p>':''}
+    <div style="text-align:left">${S.players.map(p=>`<div class="pl"><span class="grow">${esc(p.name)}</span><span class="cnt">${cntHtml(p)}</span></div>`).join('')}</div>
+    <div style="height:10px"></div>${S.you===S.host?'<button class="ok" style="width:100%" data-act="newgame">Нова гра (повернутися в лобі)</button>':'<p class="sub">Очікуйте, поки господар розпочне нову гру.</p>'}
+    <button style="width:100%;margin-top:8px" data-act="logmodal">Журнал гри</button>`);
+}
+
+// ------------------------------------------------------------------ події
+document.addEventListener('click', async e=>{
+  const t = e.target.closest('[data-act]'); if(!t) return;
+  const a = t.dataset.act, id = t.dataset.id!==undefined ? +t.dataset.id : null;
+  if(t.dataset.map){if(t.dataset.map==='zoomin')mapZoom(mapState.scale*1.2);else if(t.dataset.map==='zoomout')mapZoom(mapState.scale/1.2);else mapReset();return;}
+  if(a==='join') return doJoin();
+  if(a==='claim') return doJoin(id);
+  if(a==='rules'){ ui.rules=true; return showRules(); }
+  if(a==='close'){ ui.rules=false; ui.zoom=null; if(S&&S.phase==='over') return showOver(); return closeModal(); }
+  if(a==='addbot') return act('add_bot',{kind:'ai'});
+  if(a==='addnb') return act('add_bot',{kind:'neighbor', thr: ui.thr});
+  if(a==='remove') return act('remove',{id});
+  if(a==='start') return act('start');
+  if(a==='newgame'){ closeModal(); return act('new_game'); }
+  if(a==='log'){ ui.showLog=!ui.showLog; return render(); }
+  if(a==='logmodal'){ modal('<h3 style="margin-top:0">Журнал</h3><div class="log" style="text-align:left">'+S.log.slice().reverse().map(l=>`<div class="${l.k}">${esc(l.t)}</div>`).join('')+'</div><button class="pri" data-act="close">Закрити</button>'); return; }
+  if(a==='target'){ if(S.event_open){ ui.target = ui.target===id?null:id; ui.targetSector=null; return render(); } return; }
+  if(a==='targetSector'){ if(S.event_open){ ui.targetSector=ui.targetSector===id?null:id; return render(); } return; }
+  if(a==='card'){ const i=+t.dataset.i;
+    if(S.event_open){ ui.card = ui.card===i?null:i; return render(); }
+    ui.zoom = S.hand[i]; return showZoom(S.hand[i]); }
+  if(a==='play'){ const i=ui.card, tg=ui.target, sec=ui.targetSector; ui.card=ui.target=ui.targetSector=null; return act('play',{card:i, target:tg, sector:sec}); }
+  if(a==='skip'){ const d = S.need_discard ? ui.card : undefined; ui.card=null; return act('skip', d!==undefined?{discard:d}:{}); }
+  if(a==='pick'){ ui.pending={k:t.dataset.k, t:t.dataset.t, sector:mapState.selected}; return render(); }
+  if(a==='confirm'){ const p=ui.pending; if(!p) return; ui.pending=null; return act(p.k,{b:p.t,sector:p.sector||mapState.selected}); }
+  if(a==='none'){ ui.pending=null; return act('none'); }
+});
+loadInfo(); poll();
+</script></body></html>

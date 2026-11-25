@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.home }}/android-sdk
+      ANDROID_HOME: ${{ runner.home }}/android-sdk
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,83 +26,74 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Locate Android SDK Manager
+      - name: Prepare writable Android SDK
         shell: bash
         run: |
           set -e
 
-          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
-          echo "Android SDK: $SDK"
+          SDK="$HOME/android-sdk"
+          mkdir -p "$SDK"
 
-          SdkManager=$(find "$SDK/cmdline-tools" -type f -name sdkmanager 2>/dev/null | head -n 1)
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
 
-          if [ -z "$SdkManager" ]; then
-            echo "sdkmanager not found. Installing command-line tools..."
-
-            mkdir -p "$SDK/cmdline-tools"
-
-            cd "$SDK/cmdline-tools"
-
-            curl -fsSL \
-              https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip \
-              -o tools.zip
-
-            mkdir -p temp
-            unzip -q tools.zip -d temp
-
-            rm -rf latest
-            mv temp/cmdline-tools latest
-            rm -rf temp tools.zip
-
-            SdkManager="$SDK/cmdline-tools/latest/bin/sdkmanager"
-          fi
-
-          chmod +x "$SdkManager"
-
-          echo "SDK Manager found: $SdkManager"
-          echo "SDKMANAGER=$SdkManager" >> "$GITHUB_ENV"
-          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$SDK/platform-tools" >> "$GITHUB_PATH"
 
-      - name: Install Android SDK packages
+          EXISTING_SDKMANAGER=$(find /usr/local/lib/android/sdk /opt/android-sdk -type f -name sdkmanager 2>/dev/null | head -n 1 || true)
+
+          if [ -z "$EXISTING_SDKMANAGER" ]; then
+            echo "sdkmanager not found on runner"
+            exit 1
+          fi
+
+          echo "SDK Manager: $EXISTING_SDKMAN"
+          echo "SDKMANAGER=$EXISTING_SDKMAN" >> "$GITHUB_ENV"
+
+      - name: Install Android packages
         shell: bash
         run: |
           set -e
 
-          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" --licenses || true
+          SDK="$HOME/android-sdk"
+          SM="$SDKMANAGER"
 
-          "$SDKMANAGER" --sdk_root="$ANDROID_HOME" \
+          bash "$SM" --sdk_root="$SDK" --licenses || true
+
+          bash "$SM" --sdk_root="$SDK" \
             "platform-tools" \
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-      - name: Verify Android SDK
+      - name: Configure local Android SDK
+        shell: bash
         run: |
-          echo "Checking SDK installation..."
+          echo "sdk.dir=$HOME/android-sdk" > local.properties
+
+      - name: Verify Android SDK
+        shell: bash
+        run: |
+          set -e
           ls "$ANDROID_HOME/platforms"
           ls "$ANDROID_HOME/build-tools"
 
-      - name: Grant Gradle execute permission
+      - name: Grant Gradle wrapper permission
         run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
           fi
 
-      - name: Build APK
+      - name: Build Debug APK
         shell: bash
         run: |
           set -e
 
           if [ -f ./gradlew ]; then
             ./gradlew assembleDebug
-          elif command -v gradle >/dev/null 2>&1; then
-            gradle assembleDebug
           else
-            echo "ERROR: Gradle wrapper and system Gradle are missing."
-            exit 1
+            gradle assembleDebug
           fi
 
-      - name: Locate APK
+      - name: Find APK
         run: |
           find . -type f -name "*.apk" -print
 

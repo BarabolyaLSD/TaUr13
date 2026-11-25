@@ -1,0 +1,51 @@
+name: Build Android APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platforms;android-34
+            build-tools;34.0.0
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Run Java core tests
+        run: |
+          mkdir -p out
+          javac -encoding UTF-8 -d out app/src/main/java/ua/urbanist/core/*.java jvm-tools/ua/urbanist/tools/*.java
+          java -Dfile.encoding=UTF-8 -cp out ua.urbanist.tools.SelfTest
+
+      - name: Run map and embedded UI checks
+        run: |
+          node tests/map_static_test.js
+          node tests/ui_syntax_test.js
+
+      - name: Build debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tactical-urbanist-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30

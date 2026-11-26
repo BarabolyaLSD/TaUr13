@@ -1,102 +1,68 @@
 
-name: Build Android APK
+name: buildapk
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Prepare writable Android SDK
+      - name: Install Android SDK
         shell: bash
         run: |
           set -e
-
           SDK="$HOME/android-sdk"
           mkdir -p "$SDK"
 
-          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          SM="$(find /usr/local/lib/android/sdk/cmdline-tools -type f -name sdkmanager -print -quit)"
 
-          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
-
-          EXISTING_SDKMANAGER=$(find /usr/local/lib/android/sdk /opt/android-sdk -type f -name sdkmanager 2>/dev/null | head -n 1 || true)
-
-          if [ -z "$EXISTING_SDKMANAGER" ]; then
-            echo "sdkmanager not found on runner"
+          if [ -z "$SM" ]; then
+            echo "ERROR: sdkmanager not found"
             exit 1
           fi
 
-          echo "SDK Manager: $EXISTING_SDKMAN"
-          echo "SDKMANAGER=$EXISTING_SDKMAN" >> "$GITHUB_ENV"
+          echo "Using: $SM"
 
-      - name: Install Android packages
-        shell: bash
-        run: |
-          set -e
+          "$SM" --sdk_root="$SDK" --licenses || true
 
-          SDK="$HOME/android-sdk"
-          SM="$SDKMANAGER"
-
-          bash "$SM" --sdk_root="$SDK" --licenses || true
-
-          bash "$SM" --sdk_root="$SDK" \
+          "$SM" --sdk_root="$SDK" \
             "platform-tools" \
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-      - name: Configure local Android SDK
-        shell: bash
-        run: |
-          echo "sdk.dir=$HOME/android-sdk" > local.properties
+          echo "sdk.dir=$SDK" > local.properties
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
 
-      - name: Verify Android SDK
-        shell: bash
-        run: |
-          set -e
-          ls "$ANDROID_HOME/platforms"
-          ls "$ANDROID_HOME/build-tools"
-
-      - name: Grant Gradle wrapper permission
-        run: |
-          if [ -f ./gradlew ]; then
-            chmod +x ./gradlew
-          fi
-
-      - name: Build Debug APK
+      - name: Build APK
         shell: bash
         run: |
           set -e
-
-          if [ -f ./gradlew ]; then
+          if [ -f gradlew ]; then
+            chmod +x gradlew
             ./gradlew assembleDebug
           else
-            gradle assembleDebug
+            echo "ERROR: gradlew not found"
+            exit 1
           fi
-
-      - name: Find APK
-        run: |
-          find . -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Taktychnyi-Urbanist-APK
+          name: buildapk
           path: '**/build/outputs/apk/debug/*.apk'
           if-no-files-found: error
           retention-days: 14
